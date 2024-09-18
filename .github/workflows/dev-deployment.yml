@@ -1,0 +1,14 @@
+name: Docs Dev Deployment
+on:
+  push:
+    branches:
+      - SPEC-170-dev-deployment-update-for-review
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/build_and_deploy.yml
+    with:
+      environment: "dev"
+      core_app: "docs"
+    secrets: inherit

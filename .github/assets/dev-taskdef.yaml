@@ -1,0 +1,11 @@
+region: eu-west-1
+hostport: 80
+containerport: 80
+role: frontend-application
+environment: dev
+iac: terraform-workspace-aws-dev-apps-eu-west-1-apps-docs-dev-polygon-technology
+team_name: documentation
+docker_file: Dockerfile.review
+docker_build_params: TARGET_BRANCH_REGEX=*dev*
+memory: 1024
+cpu: 512
