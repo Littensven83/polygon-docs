@@ -29,8 +29,10 @@ jobs:
 
         - name: List branches matching pattern
           run: |
-            branches=$(git branch -r --list)
-            echo "Matching branches: $branches"
+            cat .git/config
+            git branch -r
+#            branches=$(git branch -r --list)
+#            echo "Matching branches: $branches"
 
 #        - name: Create folders and checkout branches
 #          run: |
