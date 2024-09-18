@@ -22,6 +22,8 @@ jobs:
       steps:
         - name: Checkout Code Repository
           uses: actions/checkout@v3
+          with:
+            ref: "Swader-patch-1"
 
         - uses: actions/setup-python@v4
           with:
