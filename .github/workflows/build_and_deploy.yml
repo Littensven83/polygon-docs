@@ -32,7 +32,6 @@ jobs:
 
         - name: Build Site
           run: |
-#            python build_branches.py '*${{ inputs.environment }}*'
             python build_branches.py '*kmurphy*'
 
         - name: Set Environment Variable

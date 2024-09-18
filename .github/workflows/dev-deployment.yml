@@ -12,3 +12,4 @@ jobs:
       environment: "dev"
       core_app: "docs"
     secrets: inherit
+    
