@@ -29,17 +29,17 @@ jobs:
 
         - name: List branches matching pattern
           run: |
-            branches=$(git branch -r --list "*kmurphy*" | grep -v '\->')
+            branches=$(git branch -r --list)
             echo "Matching branches: $branches"
 
-        - name: Create folders and checkout branches
-          run: |
-            for branch in $branches; do
-              branch_name=$(echo "$branch" | sed 's|origin/||')
-              mkdir -p branch/$branch_name
-              git checkout -b "$branch_name" --track "origin/$branch_name"
-            done
-            ls -lrt branch
+#        - name: Create folders and checkout branches
+#          run: |
+#            for branch in $branches; do
+#              branch_name=$(echo "$branch" | sed 's|origin/||')
+#              mkdir -p branch/$branch_name
+#              git checkout -b "$branch_name" --track "origin/$branch_name"
+#            done
+#            ls -lrt branch
 
 #        - name: Install pipenv
 #          run: pip install pipenv
