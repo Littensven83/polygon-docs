@@ -25,39 +25,58 @@ jobs:
           with:
             fetch-depth: 0
 
-        - uses: actions/setup-python@v4
-          with:
-            python-version: '3.11'
+        # - uses: actions/setup-python@v4
+        #   with:
+        #     python-version: '3.11'
 
-        - name: Install pipenv
-          run: pip install pipenv
-
-        - name: Build Site
+        - name: Install GitHub CLI
           run: |
-            python build_branches.py '*kmurphy*'
+            (type -p wget >/dev/null || ( apt update &&  apt-get install wget -y)) \
+              &&  mkdir -p -m 755 /etc/apt/keyrings \
+              && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg |  tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+              &&  chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+              && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+              &&  apt update \
+              &&  apt install gh -y
+        #     sudo apt-get update
+        #     sudo apt-get install gh -y
 
-        - name: Set Environment Variable
-          id: set-env-var
+        - name: Authenticate GitHub CLI
+          run: gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+
+        - name: List open PRs with branch names
           run: |
-              if [ "${{ inputs.environment }}" == "dev" ]; then
-                  echo "ACCOUNT_NUMBER=058264511034" >> $GITHUB_OUTPUT
-                  echo "APP_NAME=${{ inputs.core_app }}-dev" >> $GITHUB_OUTPUT
-                  echo "CLUSTER_NAME=frontend-dev-ecs-cluster" >> $GITHUB_OUTPUT
-              elif [ "${{ inputs.environment }}" == "staging" ]; then
-                  echo "ACCOUNT_NUMBER=070528468658" >> $GITHUB_OUTPUT
-                  echo "APP_NAME=${{ inputs.core_app }}-staging" >> $GITHUB_OUTPUT
-                  echo "CLUSTER_NAME=frontend-staging-ecs-cluster" >> $GITHUB_OUTPUT
-              fi
+            gh pr list --json number,headRefName,baseRefName,title --jq '.[] | {PR: .number, Branch: .headRefName, BaseBranch: .baseRefName, Title: .title}'
 
-  deploy:
-      uses: 0xPolygon/pipelines/.github/workflows/ecs_deploy_docker_taskdef.yaml@main
-      needs: set-env-variable
-      with:
-          app_name: ${{ needs.set-env-variable.outputs.APP_NAME }}
-          taskdef_file_vars: .github/assets/${{ inputs.environment }}-taskdef.yaml
-          aws_region: eu-west-1
-          environment: ${{ inputs.environment }}
-          cluster_name: ${{ needs.set-env-variable.outputs.CLUSTER_NAME }}
-          account_number: "${{ needs.set-env-variable.outputs.ACCOUNT_NUMBER }}"
-          docker_file: Dockerfile.review
-      secrets: inherit
+        # - name: Install pipenv
+        #   run: pip install pipenv
+
+  #       - name: Build Site
+  #         run: |
+  #           python build_branches.py '*kmurphy*'
+
+  #       - name: Set Environment Variable
+  #         id: set-env-var
+  #         run: |
+  #             if [ "${{ inputs.environment }}" == "dev" ]; then
+  #                 echo "ACCOUNT_NUMBER=058264511034" >> $GITHUB_OUTPUT
+  #                 echo "APP_NAME=${{ inputs.core_app }}-dev" >> $GITHUB_OUTPUT
+  #                 echo "CLUSTER_NAME=frontend-dev-ecs-cluster" >> $GITHUB_OUTPUT
+  #             elif [ "${{ inputs.environment }}" == "staging" ]; then
+  #                 echo "ACCOUNT_NUMBER=070528468658" >> $GITHUB_OUTPUT
+  #                 echo "APP_NAME=${{ inputs.core_app }}-staging" >> $GITHUB_OUTPUT
+  #                 echo "CLUSTER_NAME=frontend-staging-ecs-cluster" >> $GITHUB_OUTPUT
+  #             fi
+
+  # deploy:
+  #     uses: 0xPolygon/pipelines/.github/workflows/ecs_deploy_docker_taskdef.yaml@main
+  #     needs: set-env-variable
+  #     with:
+  #         app_name: ${{ needs.set-env-variable.outputs.APP_NAME }}
+  #         taskdef_file_vars: .github/assets/${{ inputs.environment }}-taskdef.yaml
+  #         aws_region: eu-west-1
+  #         environment: ${{ inputs.environment }}
+  #         cluster_name: ${{ needs.set-env-variable.outputs.CLUSTER_NAME }}
+  #         account_number: "${{ needs.set-env-variable.outputs.ACCOUNT_NUMBER }}"
+  #         docker_file: Dockerfile.review
+  #     secrets: inherit
